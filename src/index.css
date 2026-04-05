@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Poppins', system-ui, sans-serif;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+
+    :root {
+        font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+        color-scheme: light;
+        scrollbar-gutter: stable;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .dark {
+        color-scheme: dark;
+    }
+
+    /* 2. THE BACKGROUND TRICK */
+    /* This creates depth by ensuring the app background is slightly darker than the cards */
+    body {
+        @apply bg-slate-50 text-gray-900 transition-colors duration-200;
+    }
+
+    .dark body {
+        /* Preserves your current dark mode look */
+        @apply bg-[#030712] text-white;
+    }
+
+    /* Global Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        /* Use a color that matches your DashboardLayout background exactly */
+        background: transparent;
+    }
+
+    .dark ::-webkit-scrollbar-track {
+        background: #030712;
+        /* Matches bg-gray-950 */
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #e5e7eb;
+        /* gray-200 */
+        border-radius: 20px;
+        /* This creates the "floating" effect with padding */
+        border: 2px solid white;
+        background-clip: content-box;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+        background-color: #374151;
+        /* gray-700 */
+        border: 2px solid #030712;
+        /* Match the dark background to hide the border */
+    }
+
+    /* Hover States */
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #d1d5db;
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+        background-color: #4b5563;
+    }
+}
+
+@layer components {
+
+    /* 1. Base transition for smooth hovering */
+    .glow-card {
+        @apply transition-all duration-500 ease-out;
+    }
+
+    /* 2. Dark mode Glassmorphism base (Translucent + Blur) */
+    .dark .glow-card {
+        /* gray-900 at 80% opacity */
+        background-color: rgba(3, 7, 18, 0.8);
+        backdrop-filter: blur(12px);
+        @apply border border-gray-800;
+    }
+
+    /* 3. The "Lift" effect (Optional, but highly recommended for 3D depth) */
+    .glow-card:hover {
+        @apply -translate-y-1;
+    }
+
+    /* 4. THE GLOW COLORS (Dark Mode Only) */
+    .dark .glow-card.glow-blue:hover {
+        box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.25);
+        @apply border-blue-500/30;
+    }
+
+    .dark .glow-card.glow-emerald:hover {
+        box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.2);
+        @apply border-emerald-500/30;
+    }
+
+    .dark .glow-card.glow-yellow:hover {
+        box-shadow: 0 0 40px -10px rgba(234, 179, 8, 0.15);
+        @apply border-yellow-500/30;
+    }
+
+    /* SIDEBAR SEPARATION */
+    aside {
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+        @apply z-40 border-r-0;
+    }
+
+    .dark aside {
+        box-shadow: none;
+        @apply border-r border-gray-800;
+    }
+}
+
+@layer utilities {
+
+    /* Define the global variant */
+    .thin-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+        /* For horizontal scrollbars */
+    }
+
+    .thin-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .thin-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #e5e7eb;
+        /* tailwind gray-200 */
+        border-radius: 20px;
+    }
+
+    /* Dark mode variant */
+    .dark .thin-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #374151;
+        /* tailwind gray-700 */
+    }
+
+    /* Hover states for a premium feel */
+    .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #d1d5db;
+        /* gray-300 */
+    }
+
+    .dark .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #4b5563;
+        /* gray-600 */
+    }
+}
