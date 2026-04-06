@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { initialTransactions } from '../data/mockData';
 
 const API_URL = 'http://localhost:5000/transactions';
 
@@ -12,7 +13,8 @@ const sortTransactionsChrono = (data) => {
     if (dateA !== dateB) {
       return dateB - dateA;
     }
-    return b.id.localeCompare(a.id);
+    // Fallback to ID sorting if dates are identical
+    return String(b.id).localeCompare(String(a.id));
   });
 };
 
@@ -30,90 +32,99 @@ const useFinanceStore = create(
       // 3. ACTIONS
       setRole: (role) => set({ userRole: role }),
 
-      // FETCH: Pulls from DB. Overwrites local storage cache with fresh data.
+      /**
+       * INITIAL FETCH / SEEDING
+       * Instead of calling localhost, we check if we have data.
+       * If the store is empty, we "seed" it with mockData.
+       */
       fetchTransactions: async () => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await fetch(API_URL);
-          if (!response.ok) throw new Error('Failed to fetch transactions');
-          const data = await response.json();
+        set({ isLoading: true });
 
+        const currentData = get().transactions;
+
+        // Simulation of network delay for a professional feel
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        if (currentData.length === 0) {
           set({
-            transactions: sortTransactionsChrono(data),
+            transactions: sortTransactionsChrono(mockTransactions),
             isLoading: false
           });
-        } catch (err) {
-          set({ error: err.message, isLoading: false });
+        } else {
+          // Just re-sort what we have in storage
+          set({
+            transactions: sortTransactionsChrono(currentData),
+            isLoading: false
+          });
         }
       },
 
-      // ADD: Posts to DB first, then updates local state (and local storage)
+      /**
+       * ADD: Generates a unique ID and saves directly to state/localStorage
+       */
       addTransaction: async (newTx) => {
         set({ isLoading: true });
         try {
-          const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newTx),
-          });
+          // Simulate API delay
+          await new Promise(resolve => setTimeout(resolve, 300));
 
-          if (!response.ok) throw new Error('Failed to add transaction');
-          const savedTx = await response.json();
+          // Generate a unique ID since we don't have a backend to do it
+          const savedTx = {
+            ...newTx,
+            id: Date.now().toString()
+          };
 
           set((state) => ({
             transactions: sortTransactionsChrono([savedTx, ...state.transactions]),
             isLoading: false
           }));
         } catch (err) {
-          set({ error: err.message, isLoading: false });
+          set({ error: "Failed to add transaction", isLoading: false });
         }
       },
 
-      // UPDATE: Patches DB, then updates local state
+      /**
+       * UPDATE: Replaces the item in the local array
+       */
       updateTransaction: async (id, updatedData) => {
+        set({ isLoading: true });
         try {
-          const response = await fetch(`${API_URL}/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedData),
-          });
-
-          if (!response.ok) throw new Error('Failed to update transaction');
-          const updatedTx = await response.json();
+          await new Promise(resolve => setTimeout(resolve, 300));
 
           set((state) => {
             const updatedList = state.transactions.map((tx) =>
-              tx.id === id ? updatedTx : tx
+              tx.id === id ? { ...tx, ...updatedData } : tx
             );
-            return { transactions: sortTransactionsChrono(updatedList) };
+            return {
+              transactions: sortTransactionsChrono(updatedList),
+              isLoading: false
+            };
           });
         } catch (err) {
-          set({ error: err.message });
+          set({ error: "Failed to update transaction", isLoading: false });
         }
       },
 
-      // DELETE: Removes from DB, then local state
+      /**
+       * DELETE: Filters out the item from the local array
+       */
       deleteTransaction: async (id) => {
+        set({ isLoading: true });
         try {
-          const response = await fetch(`${API_URL}/${id}`, {
-            method: 'DELETE',
-          });
-
-          if (!response.ok) throw new Error('Failed to delete transaction');
+          await new Promise(resolve => setTimeout(resolve, 300));
 
           set((state) => ({
             transactions: state.transactions.filter((tx) => tx.id !== id),
+            isLoading: false
           }));
         } catch (err) {
-          set({ error: err.message });
+          set({ error: "Failed to delete transaction", isLoading: false });
         }
       },
     }),
     {
       name: 'zorvyn-finance-storage',
-
-      // --- THE LOCAL STORAGE MAGIC ---
-      // This saves both the role AND the API data to local storage automatically.
+      // Selective persistence: Only save the data, not the loading/error flags
       partialize: (state) => ({
         userRole: state.userRole,
         transactions: state.transactions
