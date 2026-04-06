@@ -2,8 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { initialTransactions } from '../data/mockData';
 
-const API_URL = 'http://localhost:5000/transactions';
-
 // Our robust sorting helper (Date + ID Tiebreaker)
 const sortTransactionsChrono = (data) => {
   return [...data].sort((a, b) => {
@@ -47,7 +45,7 @@ const useFinanceStore = create(
 
         if (currentData.length === 0) {
           set({
-            transactions: sortTransactionsChrono(mockTransactions),
+            transactions: sortTransactionsChrono(initialTransactions),
             isLoading: false
           });
         } else {
