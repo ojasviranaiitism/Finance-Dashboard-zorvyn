@@ -20,7 +20,7 @@ A premium, high-performance personal finance tracker built with **React**, **Tai
 
 1. **Clone the repo:**
    ```bash
-   git clone [https://github.com/your-username/zorvyn-finance-dashboard.git](https://github.com/your-username/zorvyn-finance-dashboard.git)
+   git clone https://github.com/ojasviranaiitism/Finance-Dashboard-zorvyn.git
    
 2. **Install dependencies:**
    ```bash
